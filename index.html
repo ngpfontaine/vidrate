@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>video</title>
+    <link href='./main.css' rel='stylesheet'>
+    <!-- <link type='text/css' rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"> -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,400i,700,700i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,500,700" rel="stylesheet">
+  </head>
+  <body>
+
+    <section class="content-section show" id='vid-start-form'>
+      <h2>Video Data</h2>
+      <textarea id='vid-start-input' placeholder="paste in your JSON"></textarea>
+      <div class="btn-row">
+      <button id='vid-data-default' class="btn-paste">INSERT DEFAULT DATA</button><button id='vid-data-submit'>SUBMIT ENTRY</button></div>
+    </section>
+
+    <!-- Videos will be inserted here based on VideoData information -->
+    <section id='vid-holder'>
+    </section>
+
+    <!-- Hidden template for creating videos -->
+    <div id='vid-template' class='vid-template'>
+      <div class='vid-inner'>
+
+        <div class='vid-cover vid-cover-loading show'>
+          <i class="fa fa-spinner spinner-loader"></i>
+        </div>
+
+        <div class='vid-cover vid-cover-play'>
+          <div class='vid-cover-play-btn'><i class="fa fa-play-circle"></i></div>
+        </div>
+
+        <div class='vid-cover vid-cover-msg vid-cover-rating-complete'>
+          <div class='inner'>
+            <h4 style='margin-bottom: 10px;'>Rating Complete</h4>
+            <p>
+              Your results have processed and are ready to review
+            </p>
+            <p>
+              <div class='btn btn-main btn-rating-complete btn-center'>Proceed to results</div>
+            </p>
+          </div>
+        </div>
+
+        <div class='vid-cover vid-cover-msg vid-cover-rate'>
+          <h3><i class="fa fa-bar-chart theme"></i> SIMULATION RATING</h3>
+
+          <div class='inner instructions-rating show'>
+            <span class='instr-number'>1/6</span>
+            <h4 style='margin-bottom: 10px;'>
+              <i class="fa fa-info-circle"></i> You will self-rate your performance during the simulation.<br>
+            </h4>
+            <p style='margin-bottom: 30px;'>
+              Rating uses a <span class='text-bold text-underline'>5 point</span> scale from Negative to Positive.
+            </p>
+            <div class='flex-row'>
+              <div class='flex-child-col'>
+                <span>1</span>
+                <img class='icon-face' src='./img/icons/1f620.png'>
+              </div>
+              <div class='flex-child-col'>
+                <span>2</span>
+                <img class='icon-face' src='./img/icons/1f615.png'>
+              </div>
+              <div class='flex-child-col'>
+                <span>3</span>
+                <img class='icon-face' src='./img/icons/1f610.png'>
+              </div>
+              <div class='flex-child-col'>
+                <span>4</span>
+                <img class='icon-face' src='./img/icons/1f642.png'>
+              </div>
+              <div class='flex-child-col'>
+                <span>5</span>
+                <img class='icon-face' src='./img/icons/1f600.png'>
+              </div>
+            </div>
+            <p>
+              <div class='btn btn-rating-instructions btn-sub btn-center'>Next</div>
+            </p>
+            <div class='btn-begin-rating btn-skip'>Skip and Begin</div>
+          </div>
+
+          <div class='inner instructions-rating'>
+            <span class='instr-number'>2/6</span> 
+            <h4 style='margin-bottom: 10px;'>
+              <i class="fa fa-info-circle"></i> Use the control panel below to adjust rating from 1-5:
+            </h4>
+            <p style='margin-bottom: 40px;'>
+              Up and Down 1, or jump to Bottom, Middle, or Top
+            </p>
+            <div class='flex-row'>
+              <div class='flex-child-col'>
+                <span class='text-bold'>0</span> <span class='instr-ex-btn bot'><span class='tri bot'></span></span>
+              </div>
+              <div class='flex-child-col'>
+                <span class='text-bold'>Down</span> <span class='instr-ex-btn down'><i class="fa fa-frown-o"></i></span>
+              </div>
+              <div class='flex-child-col'>
+                <span class='text-bold'>Neutral</span> <span class='instr-ex-btn neutral'><i class="fa fa-meh-o"></i></span>
+              </div>
+              <div class='flex-child-col'>
+                 <span class='text-bold'>Up</span> <span class='instr-ex-btn up'><i class="fa fa-smile-o"></i></span>
+              </div>
+              <div class='flex-child-col'>
+                <span class='text-bold'>5</span> <span class='instr-ex-btn top'><span class='tri top'></span></span>
+              </div>
+            </div>
+
+            <p>
+              <div class='btn btn-rating-instructions btn-sub btn-center'>Next</div>
+            </p>
+            <div class='btn-begin-rating btn-skip'>Skip and Begin</div>
+          </div>
+
+          <div class='inner instructions-rating'>
+            <span class='instr-number'>3/6</span> 
+            <h4>
+              <i class="fa fa-info-circle"></i> Or adjust using your keyboard:
+            </h4>
+            <div class='flex-row'>
+              <div class='flex-child-col'>
+                <span class='text-bold'>1</span> <span class='keyb-key click-a-01'>Pg Dn</span>
+              </div>
+              <div class='flex-child-col'>
+                <span class='text-bold'>Down</span> <span class='keyb-key click-a-02'><i class="fa fa-chevron-down"></i></span>
+              </div>
+              <div class='flex-child-col'>
+                <span class='text-bold'>Neutral</span> <span class='keyb-key space click-a-03'>&nbsp;</span>
+              </div>
+              <div class='flex-child-col'>
+                <span class='text-bold'>Up</span> <span class='keyb-key click-a-04'><i class="fa fa-chevron-up"></i></span>
+              </div>
+              <div class='flex-child-col'>
+                <span class='text-bold'>5</span> <span class='keyb-key click-a-05'>Pg Up</span>
+              </div>
+            </div>
+
+            <p>
+              <div class='btn btn-rating-instructions btn-sub btn-center'>Next</div>
+            </p>
+            <div class='btn-begin-rating btn-skip'>Skip and Begin</div>
+          </div>
+
+          <div class='inner instructions-rating'>
+            <span class='instr-number'>4/6</span> 
+            <h4 style='margin-bottom: 10px;'>
+              <i class="fa fa-info-circle"></i> The rating graph below will record your score over time</h4>
+            <p style='margin-bottom: 40px;'>
+              This will be compared against the system rating
+            </p>
+            <img src='./img/screen-rating-graph-01.png' class='img-screen'>
+            <p>
+              <div class='btn btn-rating-instructions btn-sub btn-center'>Next</div>
+            </p>
+            <div class='btn-begin-rating btn-skip'>Skip and Begin</div>
+          </div>
+
+          <div class='inner instructions-rating'>
+            <span class='instr-number'>5/6</span>
+            <h4 style='margin-bottom: 10px;'>
+              <i class="fa fa-info-circle"></i> The simulation recording will run until rating is complete
+            </h4>
+            <p>
+              After rating, your results will process and this simulation's analytics will be available.
+            </p>
+            <p>
+              <div class='btn btn-rating-instructions btn-sub btn-center'>Next</div>
+            </p>
+            <div class='btn-begin-rating btn-skip'>Skip and Begin</div>
+          </div>
+
+          <div class='inner instructions-rating'>
+            <span class='instr-number'>6/6</span>
+            <h4>
+              <i class="fa fa-info-circle"></i> Begin Rating when ready
+            </h4>
+            <p>
+              <div class='btn-begin-rating btn-rating-instructions btn btn-main btn-center'>Start</div>
+            </p>
+          </div>
+
+        </div>
+
+        <video preload='none'></video>
+
+        <div class='rating-ctrls enable'>
+          <div class='rating-ctrl bot'><div class='tri bot'></div></div>
+          <div class='rating-ctrl down'><i class="fa fa-frown-o"></i></div>
+          <div class='rating-ctrl neutral'><i class="fa fa-meh-o"></i></div>
+          <div class='rating-ctrl up'><i class="fa fa-smile-o"></i></div>
+          <div class='rating-ctrl top'><div class='tri top'></div></div>
+        </div>
+        
+        <div class='timeline-hover'>
+          <div class='timeline-preview'><img></div>
+          <div class='tab'>
+            <div class='vid-btn vid-btn-play'><i class="fa fa-play-circle"></i></div>
+            <div class='vid-btn vid-btn-vol'><i class="fa fa-volume-up"></i></div>
+          </div>
+          <div class='timeline'>
+            <div class='timeline-sel'></div>
+            <div class='timeline-bar'></div>
+            <div class='timeline-bar-fake'></div>
+
+          </div>
+        </div>
+
+      </div>
+      <!-- end .vid-inner -->
+
+      <div class='container-rating container-rating-user'>
+
+        <div class='tab'>
+          <h4><i class="fa fa-line-chart theme"></i> User <span class='tab-icon'></span></h4>
+        </div>
+
+        <div class='rating-y-lines'></div>
+
+        <div class='rating-timeline'>
+          <div class='rating-icons-up-down'>
+            <div class='up'>
+              <i class="fa fa-smile-o"></i>
+            </div>
+            <div class='down'>
+              <i class="fa fa-frown-o"></i>
+            </div>
+          </div>
+          <svg class='rating-timeline-update-inner' viewBox='0 0 100 100' preserveAspectRatio='none'></svg>
+          <svg class='rating-timeline-inner' viewBox='0 0 100 100' preserveAspectRatio='none'></svg>
+        </div>
+
+      </div>
+
+      <div class='container-rating container-rating-system'>
+
+        <div class='tab'>
+          <h4><i class="fa fa-line-chart theme"></i> System <span class='tab-icon'></span></h4>
+        </div>
+
+        <div class='rating-y-lines'></div>
+
+        <div class='rating-timeline rating-timeline-system'>
+          <div class='rating-icons-up-down'>
+            <div class='up'>
+              <i class="fa fa-smile-o"></i>
+            </div>
+            <div class='down'>
+              <i class="fa fa-frown-o"></i>
+            </div>
+          </div>
+          <svg class='rating-timeline-system-inner' viewBox='0 0 100 100' preserveAspectRatio='none'></svg>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- End Hidden video template  -->
+
+    <div id='demo'></div>
+    <pre id='pre' class='allselect'></pre>
+
+    <script async src="https://use.fontawesome.com/dfe288b4db.js"></script>
+
+  <script src="./js/canvas-to-blob.min.js"></script>
+  <script src='./player.js'></script>
+  <script src='./video.js'></script>
+  <script src='./rating.js'></script>
+
+  </body>
+</html>
