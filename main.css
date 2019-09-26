@@ -713,6 +713,7 @@ ul {
 }
 
 .vid-btn i.fa {
+  font-size: 0.9rem;
   /*position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -1236,7 +1237,7 @@ ul {
 .vid-cover.show .inner.show {
   opacity: 1;
   z-index: 1;
-  /*pointer-events: auto;*/
+  pointer-events: auto;
 }
 
 .vid-cover.vid-cover-play {
@@ -1271,7 +1272,10 @@ ul {
   cursor: pointer;
 }
 
-i.fa-spinner.spinner-loader {
+.noselect {
+  -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+
+.spin {
   line-height: 0;
   animation: spinner 0.5s linear infinite;
   animation-fill-mode: forwards;

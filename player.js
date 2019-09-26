@@ -75,7 +75,7 @@ var player = {
   // Toggle play/pause states
   //
 
-  Toggle(index,stateOverride) {
+  Toggle(index, stateOverride) {
     // (Note) issue here when pause, resize, play - timeline-bar jumps
     player.time.rate[index] = player.width[index]/player.dur[index]/player.time.fps
     // Specified vid via passed index param
@@ -130,10 +130,10 @@ var player = {
   // Add video load, ctrl, and ended events
   InitEventsAndData: function() {
     for (var i=0; i<gui.vid.cont.length; i++) {
-      player.status.push(null);
-      player.width.push(gui.vid.cont[i].getElementsByClassName('timeline')[0].clientWidth);
+      player.status.push(null)
+      player.width.push(gui.vid.cont[i].getElementsByClassName('timeline')[0].clientWidth)
       // Hide loading indicator when ready
-      (function(index) {
+      ;(function(index) {
 
         var vidContI = gui.vid.cont[index]
         var vidI = vidContI.getElementsByTagName('video')[0]
@@ -185,6 +185,17 @@ var player = {
             gui.vid.coverLoading[index].classList.remove('show')
             // Show timeline
             gui.vid.cont[index].getElementsByClassName('timeline-hover')[0].classList.add('show')
+          }
+        })
+        // Waiting event
+        vidI.addEventListener("waiting", function() {
+          console.log("waiting")
+          player.Toggle(index, "pause")
+        })
+        vidI.addEventListener("canplay", function() {
+          console.log("canplay")
+          if (player.time.now != undefined || player.time.now > 0) {
+            player.Toggle(index, "play")
           }
         })
 

@@ -2,6 +2,7 @@
 BUGS
 ------
 
+- Firefox, long video, "waiting" event fires right before ending, and doesn't fire "ended"
 - if target fps is too high, timeline won't move fast enough. need speed as inverse var?
   ..if rAF fps is lowered by browser, [rate] should be increased
 - rAF stops when switching tabs but vid does not
@@ -11,12 +12,12 @@ BUGS
 */
 
 // Variables for video, time
-function player(index, vid) {
+function player(vid) {
 
   // vid parameter is a reference to Video.store[i]
   // ..which contains .data, .dom, .player (prototype of this function)
 
-  let parent = this
+  var parent = this
 
   this.status = "pause", // Play/pause status container for each vid
   this.width = undefined,
@@ -26,7 +27,7 @@ function player(index, vid) {
   this.time = {
     width: undefined, // Calc width, RAF uses. This is the width of the timeline bar during playback progression. grows from 0 to width of video
     widthPrep: undefined, // Calc width when click, but don't update b/c RAF uses vid.time.width
-    fps: 30,
+    fps: 40,
     rate: 0, // Frames to move every 60th of a sec
     now: undefined,
     inc: 0, // RAF incrementer to normalize time
@@ -53,9 +54,9 @@ function player(index, vid) {
   this.Kill = function() {
     parent.status = 'pause';
     parent.playing = false;
-    vid.dom.container.getElementsByClassName('timeline-bar')[0].style.transform = 'translateX(0px)';
-    vid.dom.container.getElementsByClassName('vid-btn-play')[0].innerHTML = '<i class="fa fa-play-circle"></i>'
-    vid.dom.container.getElementsByClassName('vid-cover-play')[0].classList.add('show')
+    vid.dom.tlBar.style.transform = 'translateX(0px)';
+    vid.dom.btnPlay.innerHTML = '<i class="fa fa-play-circle"></i>'
+    vid.dom.coverPlay.classList.add('show')
   },
 
 
@@ -79,7 +80,7 @@ function player(index, vid) {
   // Toggle play/pause states
   //
 
-  this.Toggle = function(stateOverride, vid) {
+  this.Toggle = function(stateOverride) {
     // (Note) issue here when pause, resize, play - timeline-bar jumps
     parent.time.rate = parent.width/parent.dur/parent.time.fps
 
@@ -87,8 +88,24 @@ function player(index, vid) {
     if (stateOverride === 'pause') {
       parent.status = 'pause'
       parent.playing = false
-      vid.dom.container.getElementsByClassName('vid-cover-play')[0].classList.add('show')
-      vid.dom.container.getElementsByClassName('vid-btn-play')[0].innerHTML = '<i class="fa fa-play-circle"></i>'
+      vid.dom.coverPlay.classList.add('show')
+      vid.dom.btnPlay.innerHTML = '<i class="fa fa-play"></i>'
+      vid.dom.video.pause()
+    }
+
+    else if (stateOverride === "play") {
+      parent.status = "play"
+      parent.playing = true
+      tBarProgress(true, vid)
+      vid.dom.btnPlay.innerHTML = '<i class="fa fa-pause"></i>'
+      vid.dom.coverPlay.classList.remove('show')
+      vid.dom.video.play()
+    }
+
+    else if (stateOverride === "buffer") {
+      parent.status = "buffer"
+      parent.playing = true
+      vid.dom.btnPlay.innerHTML = '<i class="fa spin fa-spinner"></i>'
       vid.dom.video.pause()
     }
 
@@ -97,8 +114,8 @@ function player(index, vid) {
       parent.status = 'play'
       parent.playing = true
       tBarProgress(true, vid)
-      vid.dom.container.getElementsByClassName('vid-btn-play')[0].innerHTML = '<i class="fa fa-pause-circle-o"></i>'
-      vid.dom.container.getElementsByClassName('vid-cover-play')[0].classList.remove('show')
+      vid.dom.btnPlay.innerHTML = '<i class="fa fa-pause"></i>'
+      vid.dom.coverPlay.classList.remove('show')
       vid.dom.video.play()
     }
 
@@ -108,7 +125,7 @@ function player(index, vid) {
       vid.dom.video.currentTime = 0
       parent.time.width = 0
       parent.playing = true
-      vid.dom.container.getElementsByClassName('vid-cover-play')[0].classList.remove('show')
+      vid.dom.coverPlay.classList.remove('show')
       vid.dom.video.play()
       tBarProgress(true, vid)
     }
@@ -117,8 +134,8 @@ function player(index, vid) {
     else {
       parent.status = 'pause'
       parent.playing = false
-      vid.dom.container.getElementsByClassName('vid-cover-play')[0].classList.add('show')
-      vid.dom.container.getElementsByClassName('vid-btn-play')[0].innerHTML = '<i class="fa fa-play-circle"></i>'
+      vid.dom.coverPlay.classList.add('show')
+      vid.dom.btnPlay.innerHTML = '<i class="fa fa-play"></i>'
       vid.dom.video.pause()
     }
 
@@ -129,10 +146,10 @@ function player(index, vid) {
   // Add video load, ctrl, and ended events
   this.InitEventsAndData = function() {
     parent.status = null
-    parent.width = vid.dom.container.getElementsByClassName('timeline')[0].clientWidth
+    parent.width = vid.dom.timeline.clientWidth
     // Hide loading indicator when ready
 
-    var btnVol = vid.dom.container.getElementsByClassName('vid-btn-vol')[0]
+    var btnVol = vid.dom.btnVol
     // Load each Video. this solves situation where cached video never triggers 'loadeddata' event
     vid.dom.video.load()
 
@@ -143,15 +160,15 @@ function player(index, vid) {
 
     // Video controls events
     // (note) add touch event too
-    vid.dom.container.getElementsByClassName('vid-btn-play')[0].addEventListener('click', function(e) {
-      // if (!rating.rated[index] && !rating.inProgress[index]) {
+    vid.dom.btnPlay.addEventListener('click', function(e) {
+      // if (!rating.rated && !rating.inProgress) {
       //   rating.Begin(index)
       // } else {
-        parent.Toggle(undefined, vid)
+        parent.Toggle(undefined)
       // }
     })
     // Volume Toggle
-    vid.dom.container.getElementsByClassName('vid-btn-vol')[0].addEventListener('click', function() {
+    vid.dom.btnVol.addEventListener('click', function() {
       if (vid.dom.video.muted) {
         vid.dom.video.muted = false
         btnVol.innerHTML = '<i class="fa fa-volume-up"></i>'
@@ -161,12 +178,11 @@ function player(index, vid) {
       }
     })
     // Re-play cover btn
-    vid.dom.container.getElementsByClassName('vid-cover-play')[0].addEventListener('click', function() {
-      parent.Toggle(undefined, vid)
+    vid.dom.coverPlay.addEventListener('click', function() {
+      parent.Toggle(undefined)
     })
     // On loaded event for each vid
     vid.dom.video.addEventListener('loadeddata', function() {
-      console.log('video[]: ' + index + '\nevent: loadeddata' + '\nreadyState: ' + this.readyState + '\n\n')
       if (this.readyState >= 2) {
         let seconds = this.duration % 60
         parent.dur = this.duration
@@ -175,38 +191,40 @@ function player(index, vid) {
         parent.time.width = 0
         parent.time.widthPrep = undefined
         // Show vid-cover-play
-        vid.dom.container.getElementsByClassName('vid-cover-play')[0].classList.add('show')
+        vid.dom.coverPlay.classList.add('show')
         // Hide loader
-        vid.dom.container.getElementsByClassName('vid-cover-loading')[0].classList.remove('show')
+        vid.dom.coverLoading.classList.remove('show')
         // Show timeline
-        vid.dom.container.getElementsByClassName('timeline-hover')[0].classList.add('show')
+        vid.dom.tlHover.classList.add('show')
       }
+    })
+    // Kill on 'ended'
+    vid.dom.video.addEventListener('ended', function() {
+      console.log("ended")
+      parent.Kill()
     })
     // Waiting event
     vid.dom.video.addEventListener("waiting", function() {
       console.log("waiting")
-      parent.Toggle("pause", vid)
+      parent.Toggle("buffer")
     })
     vid.dom.video.addEventListener("canplay", function() {
+      // if (parent.time.now != undefined || parent.time.now > 0) {
       console.log("canplay")
-      if (parent.time.now != undefined || parent.time.now > 0) {
-        parent.Toggle("play", vid)
+      if (parent.status === "buffer") {
+        parent.Toggle("play")
       }
     })
 
     // Ctrl - play/pause every vid
     vid.dom.video.addEventListener('click', function() {
-      // if (rating.rated[index]) {
-        parent.Toggle(undefined, vid)
+      // if (rating.rated) {
+        parent.Toggle(undefined)
       // }
-    },false)
-    // Kill on 'ended'
-    vid.dom.video.addEventListener('ended', function() {
-      parent.Kill();
     },false)
     
     // Move fake indicator on click, Timeline mouseup/mousedown
-    var timeline = vid.dom.container.getElementsByClassName('timeline')[0]
+    var timeline = vid.dom.timeline
     timeline.addEventListener('mousedown', function(e) {
       tClickDownHandler(e, vid)
     }, false)
@@ -254,7 +272,7 @@ window.addEventListener('resize', function() {
     console.log('resize');
     for (var i=0; i<Video.store.length; i++) {
       // (Note) this messes up current timeline, but is necessary for clicking timeline
-      Video.store[i].player.width = gui.vid.cont[i].getElementsByClassName('timeline')[0].clientWidth
+      Video.store[i].player.width = Video.store[i].dom.timeline.clientWidth
       console.log(Video.store[i].player.time.width)
       let w = Video.store[i].player.getCurrentPercent(Video.store[i].player.playingIndex)
       Video.store[i].player.time.width = Video.store[i].player.width * w
@@ -271,7 +289,7 @@ window.addEventListener('resize', function() {
 
 function tBarProgress(tF, vid) {
   // Cache index parameter when start, b/c on RAF loop it's undefined
-  var timelineBar = vid.dom.container.getElementsByClassName('timeline-bar')[0];
+  var timelineBar = vid.dom.tlBar;
 
   // Keep feeding inputs
   var rafID = requestAnimationFrame(function() {
@@ -280,49 +298,54 @@ function tBarProgress(tF, vid) {
   
   vid.player.time.now = Date.now();
   vid.player.time.delta = vid.player.time.now - vid.player.time.then;
-    
+  
   if (vid.player.time.delta > vid.player.time.interval) { 
     vid.player.time.then = vid.player.time.now - (vid.player.time.delta % vid.player.time.interval);
     
     // Animation
     if (vid.player.time.width <= vid.player.width) {
+      // vid.player.time.rate = vid.dom.timeline.clientWidth/vid.player.dur/vid.player.time.fps
+      // console.log(vid.player.time.rate)
 
       //player.time.width += calcRate; // Based on current FPS
-      vid.player.time.width += vid.player.time.rate; // Based on set FPS
+      vid.player.time.width += vid.player.time.rate // Based on set FPS
+      // vid.player.time.width += (vid.player.time.delta/vid.player.time.width)
+      // console.log(vid.player.time.width)
       
       // Move Bar
-      let drawX = (vid.player.width-vid.player.time.width) / vid.player.width * 100
-      timelineBar.style.transform = 'translateX(-' + drawX + '%)';
+      // let drawX = (vid.player.width-vid.player.time.width) / vid.player.width * 100
+      let dX = (vid.dom.video.currentTime/vid.player.dur) * 100
+      timelineBar.style.transform = 'translateX(-' + (100-dX) + '%)';
 
       // Draw horizontal rating line & indicator if rating running
-      // if (!rating.rated[player.playingIndex]) {
+      if (vid.rating.rated === false) {
 
-      //   let ts = player.getCurrentPercent(player.playingIndex)
-      //   let x = player.time.width / player.width * 100
-      //   let y = 100 - ((rating.scoreNow-1)/(rating.scoreMax-1)*100)
+        let ts = vid.player.getCurrentPercent(vid.player.playingIndex)
+        let x = vid.player.time.width / vid.player.width * 100
+        let y = 100 - ((vid.rating.scoreNow-1)/(vid.rating.scoreMax-1)*100)
 
-      //   gui.vid.timelineMarkUpdate.setAttribute('x2', x + '%')
-      //   gui.vid.timelineMarkUpdate.setAttribute('y2', y + '%')
-      //   gui.vid.timelineMarkIndicator.style.top = y + '%'
-      //   gui.vid.timelineMarkIndicator.style.left = x + '%';
+        gui.vid.timelineMarkUpdate.setAttribute('x2', dX + '%')
+        gui.vid.timelineMarkUpdate.setAttribute('y2', y + '%')
+        gui.vid.timelineMarkIndicator.style.top = y + '%'
+        gui.vid.timelineMarkIndicator.style.left = dX + '%';
 
-      //   // (Note) probably shouldn't look this up constantly
-      //   let pPage = gui.vid.timelineMarkPolygon.getAttribute('points')
-      //   pPageArray = pPage.split(' ')
-      //   // Polygon update
-      //   let pSet = pPageArray[0].split(',')[0] + ',' + pPageArray[0].split(',')[1] + ' ' +
-      //     pPageArray[1].split(',')[0] + ',' + y + ' ' + 
-      //     x + ',' + y + ' ' +
-      //     x + ',' + pPageArray[3].split(',')[1]
-      //   gui.vid.timelineMarkPolygon.setAttribute('points',pSet)
-      // }
+        // (Note) probably shouldn't look this up constantly
+        let pPage = gui.vid.timelineMarkPolygon.getAttribute('points')
+        pPageArray = pPage.split(' ')
+        // Polygon update
+        let pSet = pPageArray[0].split(',')[0] + ',' + pPageArray[0].split(',')[1] + ' ' +
+          pPageArray[1].split(',')[0] + ',' + y + ' ' + 
+          dX + ',' + y + ' ' +
+          dX + ',' + pPageArray[3].split(',')[1]
+        gui.vid.timelineMarkPolygon.setAttribute('points',pSet)
+      }
 
     }
 
   }
   
-  if (vid.player.status === 'pause') {
-    vid.player.playing = false;
+  if (vid.player.status === 'pause' || vid.player.status === "buffer") {
+    // vid.player.playing = false;
     cancelAnimationFrame(rafID);
   }
   
@@ -333,14 +356,15 @@ function tBarProgress(tF, vid) {
 //
 // (Note) show loading indicator when new currentTime change must load video buffer
 function tClickDownHandler(e, vid) {
-  // if (rating.rated[index]) {
+
+  if (vid.rating.rated === undefined || vid.rating.rated === true) {
 
     // Up handler
     window.addEventListener('mouseup', vid.player.time.timelineUpHandler = function(e) {
       tClickUpHandler(e, vid)
     },false)
 
-    var tl = vid.dom.container.getElementsByClassName('timeline')[0]
+    var tl = vid.dom.timeline
     // Need to set here in case of click before play
     vid.player.time.rate = tl.clientWidth/vid.player.dur/vid.player.time.fps
     e.preventDefault()
@@ -355,7 +379,7 @@ function tClickDownHandler(e, vid) {
 
     // X position will be click's clientX minus video offset and timeline offset
     let x = e.clientX - tl.offsetLeft - vid.dom.container.offsetLeft
-    let drawX = x / vid.player.width * 100
+    // let drawX = x / vid.player.width * 100
 
     timelineSel.classList.add('show')
     timelineSel.style.transform = 'translateX(' + x + 'px)'
@@ -365,7 +389,7 @@ function tClickDownHandler(e, vid) {
     // maybe add on document so we don't lose capture?
     window.addEventListener('mousemove', vid.player.time.timelineMoveHandler = function (e) {
       e.preventDefault()
-      var tl = vid.dom.container.getElementsByClassName('timeline')[0]
+      var tl = vid.dom.timeline
       let tlLeft = vid.dom.container.offsetLeft+tl.offsetLeft
       tFakeMove(e, tlLeft, vid.player.time.fakeToggle, tl, vid)
       let calcTimeMove = vid.player.CalcTimeLocPrep(e.clientX, tlLeft, tl.clientWidth)
@@ -373,7 +397,8 @@ function tClickDownHandler(e, vid) {
       vid.dom.video.currentTime = calcTimeMove[0]
     },false)
 
-  // }
+  }
+
 }
 
 //
@@ -381,9 +406,9 @@ function tClickDownHandler(e, vid) {
 //
 
 function tClickUpHandler(e, vid) {
-  // if (rating.rated[index]) {
+  // if (rating.rated) {
     vid.player.time.fakeToggle = false
-    var tl = vid.dom.container.getElementsByClassName('timeline')[0]
+    var tl = vid.dom.timeline
 
     var timelineSel = tl.getElementsByClassName('timeline-sel')[0]
     var timelineBar = tl.getElementsByClassName('timeline-bar')[0]
@@ -430,7 +455,7 @@ function tFakeMove(xVal, offLeft, trueFalse, target, vid) {
   var width = target.clientWidth
   if (trueFalse) {
     var dist =  width-(xVal.clientX-offLeft);
-    let drawX = dist / vid.player.width * 100;
+    // let drawX = dist / vid.player.width * 100;
     timelineBarFake.style.transform = 'translateX(-' + dist + 'px)';
     timelineBarFake.classList.add('show');
     // Move selection bar w/ drag

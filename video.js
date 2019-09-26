@@ -1,11 +1,26 @@
 var VideoData = [
   {
-    "id": "12#eBy-038c@y00",
     "url": [
       ["mp4","./video/bbb.mp4"]
     ],
     "valence": {
       "system": {
+        "time": [
+          0,
+          1.42,
+          3.58,
+          5.68,
+          8.19,
+          10.026667
+        ],
+        "rating": [
+          3,
+          4,
+          1,
+          3,
+          5,
+          5
+        ]
       },
       "user": {
         "time": [],
@@ -15,101 +30,90 @@ var VideoData = [
   }
 ]
 
-// Dom vars for templating loop
-const template = {
-  template: document.getElementById('vid-template'),
-  holder: document.getElementById('vid-holder')
-};
+var Video = {
 
-var video = {
+  // Container key for all videos
+  store: [],
 
-  // Insert video(s) into document
-  // Grab from template, & use VideoData properties
+  // Insert video(s) into page, store references
   AddToPage: function() {
-    for (var i=0; i<VideoData.length; i++) {
-      setTimeout(function() {},3000)
-      var vidKey = template.template.cloneNode(true)
-      vidKey.id = '' // reset id
-      vidKey.className = 'container-vid' // add class needed by JS
 
+    // Loop through VideoData array
+    var i = 0
+    var vLen = VideoData.length 
+    for (i; i<vLen; i++) {
+
+      // Create obj storage reference
+      let ref = {}
+      ref.data = VideoData[i]
+      ref.dom = {}
+
+      // Create DOM for video
+      let vNode = gui.template.template.cloneNode(true)
+      vNode.className = 'container-vid' // add class needed by JS
       // Add video to page
-      template.holder.appendChild(vidKey)
+      gui.template.holder.appendChild(vNode)
 
-      let videoCont = template.holder.getElementsByClassName('container-vid')[i]
-      let video = videoCont.getElementsByTagName('video')[0]
+      // Store dom references
+      ref.dom.container = gui.template.holder.getElementsByClassName('container-vid')[i]
+      ref.dom.video = ref.dom.container.getElementsByTagName('video')[0]
+      ref.dom.timeline = ref.dom.container.getElementsByClassName('timeline')[0]
+      ref.dom.tlBar = ref.dom.container.getElementsByClassName('timeline-bar')[0]
+      ref.dom.tlHover = ref.dom.container.getElementsByClassName('timeline-hover')[0]
+      ref.dom.btnPlay = ref.dom.container.getElementsByClassName('vid-btn-play')[0]
+      ref.dom.coverPlay = ref.dom.container.getElementsByClassName('vid-cover-play')[0]
+      ref.dom.coverLoading = ref.dom.container.getElementsByClassName('vid-cover-loading')[0]
+      ref.dom.btnVol = ref.dom.container.getElementsByClassName('vid-btn-vol')[0]
 
-      // (Note) temporary. just mute for sanity
-      video.muted = true
+      // (Note) temporary -- mute video for sanity
+      ref.dom.video.muted = true
 
-      // Add video <source>s, add urls, then append to <video>
-      for (var j=0; j<VideoData[i].url.length; j++) {
+      // Add video tag sources, urls, append in DOM
+      for (var j=0; j<ref.data.url.length; j++) {
         let src = document.createElement('source')
-        src.type = 'video/' + VideoData[i].url[j][0]
-        src.src = VideoData[i].url[j][1]
-        video.appendChild(src)
+        src.type = 'video/' + ref.data.url[j][0]
+        src.src = ref.data.url[j][1]
+        ref.dom.video.appendChild(src)
       }
-    }
 
-    // Grab values, add ctrl & video events
-    // (Note) will be in POST request, after video.AddToPage()
-    player.InitEventsAndData()
-    // (Note) rating doesn't exist yet
-    // rating.Init()
+      // Create player prototype for video
+      ;(function(index, reference) {
+        ref.player = new player(reference)
+        ref.rating = new rating(index, reference)
+      })(i, ref)
+      Video.store.push(ref)
+
+      // When ready, Grab values, add ctrl & video events, and del listener
+      var canPlayListener = (function(vid) {
+        vid.player.InitEventsAndData()
+        vid.dom.video.removeEventListener("canplay", canPlayListener)
+      })(ref)
+      ref.dom.video.addEventListener("canplay", canPlayListener)
+
+      // Setup rating
+      Video.store[i].rating.Init()
+
+    } // End loop
 
   }
 
 }
 
-// (Note) this will be triggered in/by a post request w/ incoming data
-// video.AddToPage()
-
-//
-// Dom references, separated by component
-//
-
-const gui = {
-  vid: {
-    cont: document.getElementsByClassName('container-vid'),
-    // contLen: document.getElementsByClassName('container-vid').length,
-    demo: document.getElementById('demo'),
-    coverLoading: document.getElementsByClassName('vid-cover-loading'),
-    coverLoadingLen: document.getElementsByClassName('vid-cover-loading').length,
-    coverPlay: document.getElementsByClassName('vid-cover-play')
-  },
-  rate: {
-    cont: document.getElementsByClassName('container-rating'),
-    ctrls: document.getElementsByClassName('rating-ctrls'),
-    timelines: document.getElementsByClassName('rating-timeline'),
-    timelinesSystem: document.getElementsByClassName('rating-timeline-system'),
-    timelinesInner: document.getElementsByClassName('rating-timeline-inner'),
-    timelinesUpdateInner: document.getElementsByClassName('rating-timeline-update-inner'),
-    timelinesSystemInner: document.getElementsByClassName('rating-timeline-system-inner'),
-    msgs: document.getElementsByClassName('vid-cover-msg'),
-    instructions: document.getElementsByClassName('instructions-rating')
-  },
-  form: {
-    cont: document.getElementById("vid-start-form"),
-    input: document.getElementById("vid-start-input"),
-    default: document.getElementById("vid-data-default"),
-    submit: document.getElementById("vid-data-submit"),
-  }
-};
-
 // Getting started
 // Paste Default
+// gui.form.cont.classList.add("show")
 // gui.form.default.addEventListener("click", function() {
 //   gui.form.input.value = JSON.stringify(VideoData[0], undefined, 2)
 // })
 // // Run Pasted Data
 // gui.form.submit.addEventListener("click", function() {
 //   VideoData[0] = JSON.parse(gui.form.input.value)
-//   video.AddToPage()
+//   Video.AddToPage()
 //   gui.form.cont.classList.remove("show")
 // })
 
 
 // Don't display JSON paste overlay, just run from VideoData[0]
-gui.form.cont.classList.remove("show")
 window.addEventListener("load", function() {
-  video.AddToPage(true)
+  Video.AddToPage()
 })

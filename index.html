@@ -10,7 +10,7 @@
   </head>
   <body>
 
-    <section class="content-section show" id='vid-start-form'>
+    <section class="content-section" id='vid-start-form'>
       <h2>Video Data</h2>
       <textarea id='vid-start-input' placeholder="paste in your JSON"></textarea>
       <div class="btn-row">
@@ -26,11 +26,11 @@
       <div class='vid-inner'>
 
         <div class='vid-cover vid-cover-loading show'>
-          <i class="fa fa-spinner spinner-loader"></i>
+          <i class="fa fa-spinner spinner-loader spin"></i>
         </div>
 
         <div class='vid-cover vid-cover-play'>
-          <div class='vid-cover-play-btn'><i class="fa fa-play-circle"></i></div>
+          <div class='vid-cover-play-btn'><i class="fa fa-play"></i></div>
         </div>
 
         <div class='vid-cover vid-cover-msg vid-cover-rating-complete'>
@@ -198,7 +198,7 @@
         <div class='timeline-hover'>
           <div class='timeline-preview'><img></div>
           <div class='tab'>
-            <div class='vid-btn vid-btn-play'><i class="fa fa-play-circle"></i></div>
+            <div class='vid-btn vid-btn-play'><i class="fa fa-play"></i></div>
             <div class='vid-btn vid-btn-vol'><i class="fa fa-volume-up"></i></div>
           </div>
           <div class='timeline'>
@@ -268,7 +268,8 @@
     <script async src="https://use.fontawesome.com/dfe288b4db.js"></script>
 
   <script src="./js/canvas-to-blob.min.js"></script>
-  <script src='./player.js'></script>
+  <script src='./gui.js'></script>
+  <script src='./player-new.js'></script>
   <script src='./video.js'></script>
   <script src='./rating.js'></script>
 
