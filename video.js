@@ -1,7 +1,7 @@
 var VideoData = [
   {
     "url": [
-      ["mp4","./video/bbb.mp4"]
+      ["mp4","./video/video_2.mp4"]
     ],
     "valence": {
       "system": {
@@ -91,7 +91,7 @@ var Video = {
       ref.dom.video.addEventListener("canplay", canPlayListener)
 
       // Setup rating
-      Video.store[i].rating.Init()
+      // Video.store[i].rating.Init()
 
     } // End loop
 

@@ -208,6 +208,12 @@ function player(vid) {
       console.log("waiting")
       parent.Toggle("buffer")
     })
+    vid.dom.video.addEventListener("stalled", function() {
+      console.log("stalled")
+    })
+    vid.dom.video.addEventListener("error", function() {
+      console.log("error")
+    })
     vid.dom.video.addEventListener("canplay", function() {
       // if (parent.time.now != undefined || parent.time.now > 0) {
       console.log("canplay")
